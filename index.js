@@ -7,12 +7,17 @@ app.use(cors());
 app.use(express.json());
 
 mercadopago.configure({
-  access_token: 'TEST-8721001581479559-061801-b002b51c6de767681a34cf6a948e228d-2095110352'  // ← cambia esto por tu token real de pruebas
+  access_token: 'TU_ACCESS_TOKEN_AQUÍ' // ← reemplázalo con tu token de prueba o producción
 });
 
 app.post('/crear-preferencia', async (req, res) => {
   try {
-    const items = req.body.items.map((item) => ({
+    const { items, usuario } = req.body;
+
+    console.log("🛍️ Productos en carrito:", items);
+    console.log("👤 Usuario:", usuario);
+
+    const mpItems = items.map((item) => ({
       title: item.nombre,
       quantity: item.cantidad,
       currency_id: 'CLP',
@@ -20,23 +25,31 @@ app.post('/crear-preferencia', async (req, res) => {
     }));
 
     const preference = {
-      items,
+      items: mpItems,
       back_urls: {
-        success: "https://tusitio.com/success",
-        failure: "https://tusitio.com/failure"
+        success: `https://tusitio.com/success?usuario_id=${usuario?.id || ''}`,
+        failure: `https://tusitio.com/failure?usuario_id=${usuario?.id || ''}`
       },
-      auto_return: "approved"
+      auto_return: 'approved',
+      metadata: {
+        usuario_id: usuario?.id,
+        nombre: usuario?.nombre,
+        correo: usuario?.correo,       // ← coincide con tu tabla
+        rut: usuario?.rut,
+        direccion: usuario?.direccion,
+        telefono: usuario?.telefono
+      }
     };
 
     const result = await mercadopago.preferences.create(preference);
     res.json({ init_point: result.body.init_point });
+
   } catch (e) {
     console.error("❌ Error creando preferencia:", JSON.stringify(e, null, 2));
     res.status(500).json({ error: e.message || "Error desconocido al crear preferencia" });
   }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🟢 Servidor Mercado Pago corriendo en puerto ${PORT}`);
+app.listen(3000, () => {
+  console.log('🟢 Servidor Mercado Pago corriendo en http://localhost:3000');
 });
