@@ -31,8 +31,8 @@ app.post('/crear-preferencia', async (req, res) => {
     const result = await mercadopago.preferences.create(preference);
     res.json({ init_point: result.body.init_point });
   } catch (e) {
-    console.error('❌ Error creando preferencia:', e);
-    res.status(500).json({ error: 'Error al crear preferencia' });
+    console.error("❌ Error creando preferencia:", JSON.stringify(e, null, 2));
+    res.status(500).json({ error: e.message || "Error desconocido al crear preferencia" });
   }
 });
 
