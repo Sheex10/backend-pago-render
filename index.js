@@ -36,4 +36,7 @@ app.post('/crear-preferencia', async (req, res) => {
   }
 });
 
-app.listen(3000, () => console.log('🟢 Servidor Mercado Pago corriendo en http://localhost:3000'));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🟢 Servidor Mercado Pago corriendo en puerto ${PORT}`);
+});
